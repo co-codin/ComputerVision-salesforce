@@ -35,3 +35,43 @@ folders = glob(train_path + '/*')
 
 # plt.imshow(image.load_img(np.random.choice(image_files)))
 # plt.show()
+
+res = ResNet50(input_shape=IMAGE_SIZE + [3], weights='imagenet', include_top=False)
+
+for layer in res.layers:
+    layer.trainable = False
+
+x = Flatten()(res.output)
+prediction = Dense(len(folders), activation='softmax')(x)
+
+model = Model(inputs=res.input, outputs=prediction)
+
+model.summary()
+
+model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+
+gen = ImageDataGenerator(
+    rotation_range=20,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
+    shear_range=0.1,
+    zoom_range=0.2,
+    horizontal_flip=True,
+    vertical_flip=True,
+    preprocessing_function=preprocess_input
+)
+
+# get label mapping for confusion matrix plot later
+test_gen = gen.flow_from_directory(valid_path, target_size=IMAGE_SIZE)
+labels = [None] * len(test_gen.class_indices)
+for k, v in test_gen.class_indices.items():
+    labels[v] = k
+
+# should be a strangely colored image (due to VGG weights being BGR)
+# for x, y in test_gen:
+#     print("min:", x[0].min(), "max:", x[0].max())
+#     plt.title(labels[np.argmax(y[0])])
+#     plt.imshow(x[0])
+#     plt.show()
+#     break
+
