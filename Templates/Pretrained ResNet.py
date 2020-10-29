@@ -75,3 +75,68 @@ for k, v in test_gen.class_indices.items():
 #     plt.show()
 #     break
 
+train_generator = gen.flow_from_directory(
+    train_path,
+    target_size=IMAGE_SIZE,
+    shuffle=True,
+    batch_size=batch_size
+)
+
+valid_generator = gen.flow_from_directory(
+    valid_path,
+    target_size=IMAGE_SIZE,
+    shuffle=True,
+    batch_size=batch_size,
+)
+
+r = model.fit_generator(
+    train_generator,
+    validation_data=valid_generator,
+    epochs=epochs,
+    steps_per_epoch=len(image_files) // batch_size,
+    validation_steps=len(valid_image_files) // batch_size,
+)
+
+def get_confusion_matrix(data_path, N):
+    print("Generating confusion matrix", N)
+    predictions = []
+    targets = []
+    i = 0
+
+    for x, y in gen.flow_from_directory(data_path, target_size=IMAGE_SIZE, shuffle=False, batch_size=batch_size * 2):
+        i += 1
+        if i % 50 == 0:
+            print(i)
+        p = model.predict(x)
+        p = np.argmax(p, axis=1)
+        y = np.argmax(y, axis=1)
+
+        predictions = np.concatenate((predictions, p))
+        targets = np.concatenate((targets, y))
+
+        if len(targets) >= N:
+            break
+
+    cm = confusion_matrix(targets, predictions)
+    return cm
+
+cm = get_confusion_matrix(train_path, len(image_files))
+print(cm)
+valid_cm = get_confusion_matrix(valid_path, len(valid_image_files))
+print(valid_cm)
+
+# loss
+plt.plot(r.history['loss'], label='train loss')
+plt.plot(r.history['val_loss'], label='val loss')
+plt.legend()
+plt.show()
+
+# accuracies
+plt.plot(r.history['accuracy'], label='train acc')
+plt.plot(r.history['val_accuracy'], label='val acc')
+plt.legend()
+plt.show()
+
+from util import plot_confusion_matrix
+plot_confusion_matrix(cm, labels, title='Train confusion matrix')
+plot_confusion_matrix(valid_cm, labels, title='Validation confusion matrix')
