@@ -22,3 +22,16 @@ IMAGE_SIZE = [224, 224]
 epochs = 16
 batch_size = 32
 
+# https://www.kaggle.com/paultimothymooney/blood-cells
+train_path = './datasets/blood_cell/images/TRAIN'
+valid_path = './datasets/blood_cell/images/TEST'
+
+# get number of files
+image_files = glob(train_path + '/*/*.jp*g')
+valid_image_files = glob(valid_path + '/*/*.jp*g')
+
+# get number of classes
+folders = glob(train_path + '/*')
+
+# plt.imshow(image.load_img(np.random.choice(image_files)))
+# plt.show()
