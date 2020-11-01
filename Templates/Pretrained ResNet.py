@@ -19,7 +19,7 @@ from glob import glob
 # resize all the images to this
 IMAGE_SIZE = [224, 224]
 
-epochs = 16
+epochs = 32
 batch_size = 32
 
 # https://www.kaggle.com/paultimothymooney/blood-cells
