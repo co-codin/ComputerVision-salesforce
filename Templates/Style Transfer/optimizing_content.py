@@ -18,7 +18,24 @@ if tf.__version__.startswith('2'):
 
 
 def VGG16_AvgPool(shape):
-    pass
+    vgg = VGG16(input_shape=shape, weights='imagenet', include_top=False)
+
+    new_model = Sequential()
+    for layer in vgg.layers:
+        if layer.__class__ == MaxPooling2D:
+            new_model.add(AveragePooling2D())
+        else:
+            new_model.add(layer)
+
+    # i = vgg.input
+    # x = i
+    # for layer in vgg.layers:
+    #     if layer.__class__ == MaxPooling2D:
+    #         x = AveragePooling2D()(x)
+    #     else:
+    #         x = layer(x)
+
+    return new_model
 
 def VGG16_AvgPool_CutOff(shape, num_convs):
     pass
