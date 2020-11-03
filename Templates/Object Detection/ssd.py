@@ -16,7 +16,7 @@ import object_detection
 from utils import label_map_util
 from utils import visualization_utils as vis_util
 
-ODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
+MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
 PATH_TO_CKPT = '%s/%s/frozen_inference_graph.pb' % (MODELS_PATH, MODEL_NAME)
 PATH_TO_LABELS = '%s/data/mscoco_label_map.pbtxt' % MODELS_PATH
 NUM_CLASSES = 90
