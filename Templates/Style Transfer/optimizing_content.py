@@ -54,24 +54,24 @@ def VGG16_AvgPool_CutOff(shape, num_convs):
 
     new_model = Sequential()
 
-    # n = 0
-    # for layer in model.layers:
-    #     if layer.__class__ == Conv2D:
-    #         n += 1
-    #     new_model.add(layer)
-    #     if n >= num_convs:
-    #         break
-
     n = 0
-    output = None
     for layer in model.layers:
         if layer.__class__ == Conv2D:
             n += 1
+        new_model.add(layer)
         if n >= num_convs:
-            output = layer.output
             break
 
-    return Model(model.input, output)
+    # n = 0
+    # output = None
+    # for layer in model.layers:
+    #     if layer.__class__ == Conv2D:
+    #         n += 1
+    #     if n >= num_convs:
+    #         output = layer.output
+    #         break
+
+    return new_model
 
 
 def unpreprocess(img):
@@ -113,7 +113,59 @@ target = K.variable(content_model.predict(x))
 # try to match the image
 
 # define our loss in keras
-
-loss = K.mean(k.square(target - content_model.output))
+loss = K.mean(K.square(target - content_model.output))
 
 # gradients which are needed by the optimizer
+grads = K.gradients(loss, content_model.input)
+
+# just like theano.function
+get_loss_and_grads = K.function(
+    inputs=[content_model.input],
+    outputs=[loss] + grads
+)
+
+
+def get_loss_and_grads_wrapper(x_vec):
+    # scipy's minimizer allows us to pass back
+    # function value f(x) and its gradient f'(x)
+    # simultaneously, rather than using the fprime arg
+    #
+    # we cannot use get_loss_and_grads() directly
+    # input to minimizer func must be a 1-D array
+    # input to get_loss_and_grads must be [batch_of_images]
+    #
+    # gradient must also be a 1-D array
+    # and both loss and gradient must be np.float64
+    # will get an error otherwise
+
+    l, g = get_loss_and_grads([x_vec.reshape(*batch_shape)])
+    return l.astype(np.float64), g.flatten().astype(np.float64)
+
+
+from datetime import datetime
+
+t0 = datetime.now()
+losses = []
+x = np.random.randn(np.prod(batch_shape))
+
+for i in range(10):
+    x, l, _ = fmin_l_bfgs_b(
+        func=get_loss_and_grads_wrapper,
+        x0=x,
+        # bounds=[[-127, 127]]*len(x.flatten()),
+        maxfun=20
+    )
+    x = np.clip(x, -127, 127)
+    # print("min:", x.min(), "max:", x.max())
+    print("iter=%s, loss=%s" % (i, l))
+    losses.append(l)
+
+print("duration:", datetime.now() - t0)
+plt.plot(losses)
+plt.show()
+
+newimg = x.reshape(*batch_shape)
+final_img = unpreprocess(newimg)
+
+plt.imshow(scale_img(final_img[0]))
+plt.show()
