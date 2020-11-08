@@ -24,3 +24,6 @@ activation_layer = resnet.get_layer('activation_49')
 
 model = Model(inputs=resnet.inputs, outputs=activation_layer.output)
 
+final_dense = resnet.get_layer('fc1000')
+W = final_dense.get_weights()[0]
+
