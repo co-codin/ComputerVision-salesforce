@@ -75,3 +75,19 @@ combined_model = Model(z, fake_pred)
 
 combined_model.compile(loss='binary_crossentropy', optimizer=Adam(0.0002, 0.5))
 
+batch_size = 32
+epochs = 30000
+sample_period =  200 # every `sample_period` steps generate and save some data
+
+# create batch labels to use when calling train_on_batch
+ones = np.ones(batch_size)
+zeros = np.zeros(batch_size)
+
+# store the losses
+d_losses = []
+g_losses = []
+
+# create a folder to store generated images
+if not os.path.exists('gan_images'):
+    os.makedirs('gan_images')
+
