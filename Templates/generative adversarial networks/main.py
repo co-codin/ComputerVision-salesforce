@@ -46,3 +46,32 @@ def build_discriminator(img_size):
     model = Model(i, x)
     return model
 
+
+# Compile both models in preparation for training
+discriminator = build_discriminator(D)
+discriminator.compile(
+    loss='binary_crossentropy',
+    optimizer=Adam(0.0002, 0.5),
+    metrics=['accuracy']
+)
+
+# create an input to represent noise sample from latent space
+generator = build_generator(latent_dim)
+
+# create an input to represent noise sample from latent space
+z = Input(shape=(latent_dim,))
+
+# pass  noise through generator to get an image
+img = generator(z)
+
+# make sure only the generator is trained
+discriminator.trainable = False
+
+# the true output is fake, but we label them real
+fake_pred = discriminator(img)
+
+# create the combined model object
+combined_model = Model(z, fake_pred)
+
+combined_model.compile(loss='binary_crossentropy', optimizer=Adam(0.0002, 0.5))
+
