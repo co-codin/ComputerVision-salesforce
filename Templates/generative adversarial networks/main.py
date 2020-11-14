@@ -109,3 +109,25 @@ def sample_images(epoch):
             idx += 1
         fig.savefig("gan_images/%d.png" % epoch)
         plt.close()
+
+
+for epoch in range(epochs):
+    # train discriminator
+
+    # select a random batch of images
+    idx = np.random.randint(0, x_train.shape[0], batch_size)
+    real_imgs = x_train[idx]
+
+    # generate fake images
+    noise = np.random.randn(batch_size, latent_dim)
+    fake_imgs = generator.predict(noise)
+
+    # train the disriminator
+    # both loss and accuraccy are returned
+    d_loss_real, d_acc_real = discriminator.train_on_batch(real_imgs, ones)
+    d_loss_fake, d_acc_fake = discriminator.train_on_batch(fake_imgs, zeros)
+
+    d_loss = 0.5 * (d_loss_real + d_loss_fake)
+    d_acc = 0.5 * (d_acc_real + d_acc_fake)
+
+    # train generator
