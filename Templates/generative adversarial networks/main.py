@@ -131,3 +131,33 @@ for epoch in range(epochs):
     d_acc = 0.5 * (d_acc_real + d_acc_fake)
 
     # train generator
+    noise = np.random.randn(batch_size, latent_dim)
+    g_loss = combined_model.train_on_batch(noise, ones)
+
+    # save the losses
+    d_losses.append(d_loss)
+    g_losses.append(g_loss)
+
+    if epoch % 100 == 0:
+        print(f"epoch: {epoch + 1} / {epochs}, d_loss: {d_loss:.2f}, d_acc: {d_acc:.2f}, g_loss: {g_loss:.2f}")
+        
+        if epoch % sample_period == 0:
+            sample_images(epoch)
+
+
+plt.plot(g_losses, label='g_losses')
+plt.plot(d_losses, label='d_losses')
+plt.legend()
+
+from skimage.io import imread
+a = imread('gan_images/0.png')
+plt.imshow(a)
+
+a = imread('gan_images/1000.png')
+plt.imshow(a)
+
+a = imread('gan_images/10000.png')
+plt.imshow(a)
+
+a = imread('gan_images/20000.png')
+plt.imshow(a)
