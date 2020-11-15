@@ -153,11 +153,5 @@ from skimage.io import imread
 a = imread('gan_images/0.png')
 plt.imshow(a)
 
-a = imread('gan_images/1000.png')
-plt.imshow(a)
-
-a = imread('gan_images/10000.png')
-plt.imshow(a)
-
-a = imread('gan_images/20000.png')
-plt.imshow(a)
+b = imread('gan_images/29800.png')
+plt.imshow(b)
